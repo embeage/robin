@@ -1,5 +1,7 @@
 # robin
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/embeage/robin.svg)](https://pkg.go.dev/github.com/embeage/robin) [![Go Report Card](https://goreportcard.com/badge/embeage/robin)](https://goreportcard.com/report/embeage/robin) [![GitHub Actions](https://github.com/embeage/robin/actions/workflows/go.yml/badge.svg)](https://github.com/embeage/robin/actions/workflows/go.yml)
+
 Package `robin` exports a round-robin structure `Robin` for comparable types that supports O(1) addition and removal of values. It can either be unbounded or bounded by a maximum length in which case an optional buffer can be provided. The buffer will receive values added to a full `Robin` and then replace values that are removed. A buffer implementation `LIFOBuffer` is included in the package. This is a stack-like buffer with a fixed capacity, where pushing to a full buffer overwrites the oldest value.
 
 New values are added in the current position and a subsequent `Next()` call will return the first of the added values. `Robin` is constrained to unique values, duplicates are ignored. Additionally, `Robin` is not thread-safe on its own, wrap function calls with a mutex or some other synchronization primitive for concurrent access.

@@ -27,7 +27,7 @@ func NewLIFOBuffer[T comparable](capacity int) *LIFOBuffer[T] {
 }
 
 // keeps track of the number of total values as well as the
-// number of occurences of each value in the buffer
+// number of occurrences of each value in the buffer
 func (b *LIFOBuffer[T]) incrCount(v T) {
 	b.n++
 	b.count[v]++
