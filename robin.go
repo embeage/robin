@@ -228,8 +228,10 @@ func (r *Robin[T]) BufferLen() int {
 // Reset the robin. If there is a buffer, it is reset as well.
 func (r *Robin[T]) Reset() {
 	r.next = nil
-	r.nodes = make(map[T]*node[T])
 	if r.buffer != nil {
+		r.nodes = make(map[T]*node[T], r.maxLen)
 		r.buffer.Reset()
+	} else {
+		r.nodes = make(map[T]*node[T])
 	}
 }
