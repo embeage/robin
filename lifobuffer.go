@@ -9,12 +9,12 @@ package robin
 // by [Robin], the buffer will only receive unique values,
 // although it is not enforced by the buffer itself.
 type LIFOBuffer[T comparable] struct {
-	capacity int
-
 	buf   []T
 	i     int
 	n     int
 	count map[T]int
+
+	capacity int
 }
 
 // NewLIFOBuffer creates a new [LIFOBuffer] with the given capacity.
@@ -28,14 +28,14 @@ func NewLIFOBuffer[T comparable](capacity int) *LIFOBuffer[T] {
 
 // keeps track of the number of total values as well as the
 // number of occurrences of each value in the buffer
-func (b *LIFOBuffer[T]) incrCount(v T) {
+func (b *LIFOBuffer[T]) incCount(v T) {
 	b.n++
 	b.count[v]++
 }
 
 // decrements counts and removes the value from the map if
 // the count reaches zero
-func (b *LIFOBuffer[T]) decrCount(v T) {
+func (b *LIFOBuffer[T]) decCount(v T) {
 	b.n--
 	b.count[v]--
 	if b.count[v] == 0 {
@@ -47,9 +47,9 @@ func (b *LIFOBuffer[T]) decrCount(v T) {
 // value will be overwritten.
 func (b *LIFOBuffer[T]) Push(v T) {
 	if b.n == b.capacity {
-		b.decrCount(b.buf[b.i])
+		b.decCount(b.buf[b.i])
 	}
-	b.incrCount(v)
+	b.incCount(v)
 	b.buf[b.i] = v
 	b.i = (b.i + 1) % b.capacity
 }
@@ -62,7 +62,7 @@ func (b *LIFOBuffer[T]) Pop() (T, bool) {
 	}
 	b.i = (b.i - 1 + b.capacity) % b.capacity
 	v := b.buf[b.i]
-	b.decrCount(v)
+	b.decCount(v)
 	return v, true
 }
 

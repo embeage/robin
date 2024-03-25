@@ -35,11 +35,11 @@ type node[T comparable] struct {
 // Robin is not thread-safe by default. A mutex or some other form of
 // synchronization should be used for concurrent access.
 type Robin[T comparable] struct {
-	maxLen int
-	buffer Buffer[T]
-
 	next  *node[T]
 	nodes map[T]*node[T]
+
+	maxLen int
+	buffer Buffer[T]
 }
 
 // Create a new unbounded [Robin].
@@ -84,19 +84,20 @@ func (r *Robin[T]) attach(head, tail *node[T]) {
 	if r.next == nil {
 		head.prev = tail
 		tail.next = head
-	} else {
-		prev := r.next.prev
-		next := r.next
-		head.prev = prev
-		tail.next = next
-		prev.next = head
-		next.prev = tail
+		r.next = head
+		return
 	}
 
+	prev := r.next.prev
+	next := r.next
+	head.prev = prev
+	tail.next = next
+	prev.next = head
+	next.prev = tail
 	r.next = head
 }
 
-// Add values to the robin between in the current position. A
+// Add values to the robin between current position. A
 // subsequent call to [Next] will return the first added value.
 // If the robin is bounded and full and a buffer is provided, the
 // values are pushed to the buffer, otherwise they are ignored.
@@ -125,15 +126,15 @@ func (r *Robin[T]) Add(vs ...T) {
 			continue
 		}
 		node := &node[T]{v: v}
+		r.nodes[v] = node
 		if head == nil {
 			head = node
 			tail = head
-		} else {
-			node.prev = tail
-			tail.next = node
-			tail = node
+			continue
 		}
-		r.nodes[v] = node
+		node.prev = tail
+		tail.next = node
+		tail = node
 	}
 
 	r.attach(head, tail)
@@ -160,8 +161,7 @@ func (r *Robin[T]) unlink(node *node[T]) {
 // if not, the node has to be unlinked from the robin
 func (r *Robin[T]) replaceValue(node *node[T]) bool {
 	if r.buffer != nil {
-		v, ok := r.buffer.Pop()
-		if ok {
+		if v, ok := r.buffer.Pop(); ok {
 			node.v = v
 			r.nodes[v] = node
 			return true
@@ -228,10 +228,10 @@ func (r *Robin[T]) BufferLen() int {
 // Reset the robin. If there is a buffer, it is reset as well.
 func (r *Robin[T]) Reset() {
 	r.next = nil
-	if r.buffer != nil {
-		r.nodes = make(map[T]*node[T], r.maxLen)
-		r.buffer.Reset()
-	} else {
+	if r.buffer == nil {
 		r.nodes = make(map[T]*node[T])
-	}
+		return
+	} 
+	r.buffer.Reset()
+	r.nodes = make(map[T]*node[T], r.maxLen)
 }
